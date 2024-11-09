@@ -10,7 +10,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,18 +36,12 @@ public class User extends BasicEntityData  implements UserDetails {
     @NotNull
     private String phone;
 
-    private String accessToken;
-
     @NotNull
     @Column(columnDefinition = "boolean default true")
     private boolean enable = true;
 
-    private String permission;
-
     @OneToMany(mappedBy="user", fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     private List<Role> roles;
-
-    private Instant lastAccess;
 
     @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Vehicle> vehicles;

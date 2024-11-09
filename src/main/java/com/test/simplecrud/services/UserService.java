@@ -5,6 +5,7 @@ import com.test.simplecrud.dtos.requests.SignupDTO;
 import com.test.simplecrud.dtos.responses.OwnerDto;
 import com.test.simplecrud.dtos.responses.TokenDTO;
 import com.test.simplecrud.entities.User;
+import com.test.simplecrud.enums.RoleName;
 import com.test.simplecrud.exceptions.Errors;
 import com.test.simplecrud.exceptions.NotAllowedException;
 import com.test.simplecrud.exceptions.NotFoundException;
@@ -32,10 +33,13 @@ public class UserService {
     private final TokenService tokenService;
 
     private final UserRepository repository;
+    private final RoleService roleService;
 
     public UUID signup(SignupDTO dto) {
         validateifExistsByEmail(dto.email());
-        return repository.saveAndFlush( dto.toEntity() ).getId();
+        var user = save( dto.toEntity() );
+        createRole(user, RoleName.ROLE_ADMINISTRATOR);
+        return user.getId();
     }
 
     public TokenDTO login(AuthDTO dto){
@@ -55,15 +59,23 @@ public class UserService {
         return repository.findByEmail( SessionUtils.getLoggedInUsername() ).orElseThrow(() -> new NotFoundException(Errors.USER_NOT_FOUND));
     }
 
+    public Page<OwnerDto> findByFilter(String filter, int page, int size) {
+        var spec = UserSpecification.filter(filter);
+        var result = findAllBySpecAndPageable(spec, PageRequest.of( page, size ) );
+        return result.map(OwnerDto::new);
+    }
+
+    private void createRole(User user, RoleName roleName){
+        roleService.createRole(user, roleName);
+    }
+
     private void validateifExistsByEmail(String email){
         var exists = repository.existsByEmail(email);
         if(exists) throw new NotAllowedException(Errors.USER_ALREADY_REGISTERED);
     }
 
-    public Page<OwnerDto> findByFilter(String filter, int page, int size) {
-        var spec = UserSpecification.filter(filter);
-        var result = findAllBySpecAndPageable(spec, PageRequest.of( page, size ) );
-        return result.map(OwnerDto::new);
+    private User save(User user){
+        return repository.save(user);
     }
 
     private Page<User> findAllBySpecAndPageable(Specification<User> spec, PageRequest pageable) {

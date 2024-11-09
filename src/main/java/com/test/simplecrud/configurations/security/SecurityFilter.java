@@ -3,7 +3,6 @@ package com.test.simplecrud.configurations.security;
 import com.test.simplecrud.repositories.UserRepository;
 import com.test.simplecrud.services.TokenService;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -30,18 +29,24 @@ public class SecurityFilter extends OncePerRequestFilter {
     private final UserRepository repository;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String token = recoveryToken(request);
-        if (nonNull(token)) {
-            String subject = tokenService.getSubjectFromToken(token);
-            UserDetails userDetails = repository.findByEmail(subject).orElseThrow(() -> new UsernameNotFoundException(subject));
-            Authentication authentication =
-                    new UsernamePasswordAuthenticationToken(userDetails.getUsername(), null, userDetails.getAuthorities());
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException {
+        try {
+            String token = recoveryToken(request);
 
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            if (nonNull(token)) {
+                String subject = tokenService.getSubjectFromToken(token);
+                UserDetails userDetails = repository.findByEmail(subject).orElseThrow(() -> new UsernameNotFoundException(subject));
+                Authentication authentication =
+                        new UsernamePasswordAuthenticationToken(userDetails.getUsername(), null, userDetails.getAuthorities());
+
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
+
+            filterChain.doFilter(request, response);
+        }catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
         }
-
-        filterChain.doFilter(request, response);
     }
 
     private String recoveryToken(HttpServletRequest request) {
