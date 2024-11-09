@@ -1,6 +1,7 @@
 package com.test.simplecrud.configurations.handlers;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.test.simplecrud.exceptions.BadRequestException;
 import com.test.simplecrud.exceptions.CustomErrorMessage;
 import com.test.simplecrud.exceptions.NotAllowedException;
 import com.test.simplecrud.exceptions.NotFoundException;
@@ -29,7 +30,7 @@ public class ExceptionHandlers extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(ex, ex.getMessage(), new HttpHeaders(), HttpStatus.NOT_FOUND, request);
     }
 
-    @ExceptionHandler(value = {JsonMappingException.class})
+    @ExceptionHandler(value = {JsonMappingException.class, BadRequestException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     protected ResponseEntity<Object> handleNewAccountException(JsonMappingException ex, WebRequest request) {
         String bodyOfResponse = "Invalid transaction type";

@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 public class RoleService {
     private final RoleRepository repository;
 
-
     public void createRole(User user, RoleName roleName) {
         var role = Role.builder()
                 .name(roleName)

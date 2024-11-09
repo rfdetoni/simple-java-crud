@@ -78,7 +78,7 @@ class UserServiceTest {
             savedUser.setId(user.getId()); // Simulate setting an ID after saving
             return savedUser;
         });
-        when(repository.existsByEmail("test@example.com")).thenReturn(false);
+        when(repository.existsByEmail("test@example.com")).thenReturn(Boolean.valueOf(false));
 
         UUID userId = userService.signup(signupDTO);
 

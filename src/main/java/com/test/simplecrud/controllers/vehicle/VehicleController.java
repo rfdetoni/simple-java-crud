@@ -7,6 +7,7 @@ import com.test.simplecrud.services.VehicleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -51,9 +52,9 @@ public class VehicleController {
     @Operation(security = { @SecurityRequirement(name = "bearer-key") })
     @PostMapping("/all/{page}/{size}")
     public ResponseEntity<Page<VehicleDto>> getAllVehicles(@RequestBody(required = false) VehicleDto filter,
-                                                           @PathVariable int page,
-                                                           @PathVariable int size){
-        return service.findAll( page, size, filter);
+                                                           @PathVariable @Size(min= 0) int page,
+                                                           @PathVariable @Size(min=1) int size){
+        return service.findAll(page, size, filter);
     }
 
 }

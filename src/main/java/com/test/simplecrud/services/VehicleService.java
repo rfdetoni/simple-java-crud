@@ -5,6 +5,7 @@ import com.test.simplecrud.dtos.requests.UpdateVehicleDTO;
 import com.test.simplecrud.dtos.responses.VehicleDto;
 import com.test.simplecrud.entities.User;
 import com.test.simplecrud.entities.Vehicle;
+import com.test.simplecrud.exceptions.BadRequestException;
 import com.test.simplecrud.exceptions.Errors;
 import com.test.simplecrud.exceptions.NotAllowedException;
 import com.test.simplecrud.exceptions.NotFoundException;
@@ -31,6 +32,7 @@ public class VehicleService {
     private final VehicleRepository repository;
 
     public ResponseEntity<UUID> create(NewVehicleDTO dto) {
+        if(isNull(dto)) throw new BadRequestException(Errors.BAD_REQUEST);
         var owner = getOwner();
         validateIfExistsByIdentifierAndOwner(dto.vehicleIdentifier(), owner);
         var vehicle = dto.toEntity(owner);
@@ -38,6 +40,7 @@ public class VehicleService {
     }
 
     public ResponseEntity<VehicleDto> update(UUID id, UpdateVehicleDTO dto) {
+        if(isNull(dto)) throw new BadRequestException(Errors.BAD_REQUEST);
         var vehicle = findById(id);
         validateOwnership(vehicle);
         var updatedVehicle = save(mapToVehicle(vehicle, dto));
@@ -80,7 +83,7 @@ public class VehicleService {
 
         if (!isNull(dto.newOwner()) && !dto.newOwner().equals(vehicle.getOwner().getId())) {
             transferVehicle(vehicle, findOwnerById(dto.newOwner()));
-            vehicle.setSold(true);
+            vehicle.setSold(Boolean.TRUE);
             return vehicle;
         }
 
@@ -99,7 +102,7 @@ public class VehicleService {
                 .color(vehicle.getColor())
                 .sold(vehicle.getSold())
                 .manufacturer(vehicle.getManufacturer())
-                .sold( false )
+                .sold( Boolean.FALSE )
                 .fabricationYear(vehicle.getFabricationYear())
                 .modelYear(vehicle.getModelYear())
                 .build();
