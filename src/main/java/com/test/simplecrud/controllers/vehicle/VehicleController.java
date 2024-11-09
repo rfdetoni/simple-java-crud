@@ -52,8 +52,8 @@ public class VehicleController {
     @Operation(security = { @SecurityRequirement(name = "bearer-key") })
     @PostMapping("/all/{page}/{size}")
     public ResponseEntity<Page<VehicleDto>> getAllVehicles(@RequestBody(required = false) VehicleDto filter,
-                                                           @PathVariable @Size(min= 0) int page,
-                                                           @PathVariable @Size(min=1) int size){
+                                                           @PathVariable  int page,
+                                                           @PathVariable  int size){
         return service.findAll(page, size, filter);
     }
 
