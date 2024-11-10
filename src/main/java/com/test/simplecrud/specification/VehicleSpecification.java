@@ -14,6 +14,8 @@ import static java.util.Objects.isNull;
 @RequiredArgsConstructor
 public class VehicleSpecification {
 
+    private static final String LIKE = "%";
+
     public static Specification<Vehicle> buildVehicleFilter(VehicleDto filter, User owner) {
         if(isNull(filter)) {
             return Specification.where(ownerEquals(owner));
@@ -21,15 +23,21 @@ public class VehicleSpecification {
 
         return Specification.where(ownerEquals(owner)
                 .and(idEquals(filter.id()))
-                .and(vehicleIdentifierEquals(filter.vehicleIdentifier()))
-                .and(modelEquals(filter.model()))
-                .and(colorEquals(filter.color()))
-                .and(manufacturerEquals(filter.manufacturer()))
+                .and(vehicleIdentifierLike(filter.vehicleIdentifier()))
+                .and(modelLike(filter.model()))
+                .and(colorLike(filter.color()))
+                .and(manufacturerLike(filter.manufacturer()))
                 .and(fabricationYearEquals(filter.fabricationYear()))
                 .and(modelYearEquals(filter.modelYear()))
                 .and(acquisitionDateEquals(filter.acquisitionDate()))
                 .and(isSold(filter.sold()))
         );
+    }
+
+    private static String buildLike(String value){
+        StringBuilder like = new StringBuilder(LIKE);
+        like.append(value).append(LIKE);
+        return like.toString();
     }
 
     private static Specification<Vehicle> idEquals(UUID id) {
@@ -39,31 +47,31 @@ public class VehicleSpecification {
         });
     }
 
-    private static Specification<Vehicle> vehicleIdentifierEquals(String vehicleIdentifier) {
+    private static Specification<Vehicle> vehicleIdentifierLike(String vehicleIdentifier) {
         return ((root, query, criteriaBuilder) -> {
             if( isNull(vehicleIdentifier)) return null;
-            return criteriaBuilder.equal(root.get("vehicleIdentifier"), vehicleIdentifier);
+            return criteriaBuilder.like(root.get("vehicleIdentifier"), buildLike(vehicleIdentifier));
         });
     }
 
-    private static Specification<Vehicle> modelEquals(String model) {
+    private static Specification<Vehicle> modelLike(String model) {
         return ((root, query, criteriaBuilder) -> {
             if( isNull(model)) return null;
-            return criteriaBuilder.equal(root.get("model"), model);
+            return criteriaBuilder.like(root.get("model"),buildLike(model));
         });
     }
 
-    private static Specification<Vehicle> colorEquals(String color) {
+    private static Specification<Vehicle> colorLike(String color) {
         return ((root, query, criteriaBuilder) -> {
             if( isNull(color)) return null;
-            return criteriaBuilder.equal(root.get("color"), color);
+            return criteriaBuilder.like(root.get("color"), buildLike(color));
         });
     }
 
-    private static Specification<Vehicle> manufacturerEquals(String manufacturer) {
+    private static Specification<Vehicle> manufacturerLike(String manufacturer) {
         return ((root, query, criteriaBuilder) -> {
             if( isNull(manufacturer)) return null;
-            return criteriaBuilder.equal(root.get("manufacturer"), manufacturer);
+            return criteriaBuilder.like(root.get("manufacturer"), buildLike(manufacturer));
         });
     }
 
